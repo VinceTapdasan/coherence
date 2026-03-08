@@ -1,6 +1,6 @@
 const API_URL = process.env.API_URL ?? 'http://localhost:3001';
 
-async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
     headers: {

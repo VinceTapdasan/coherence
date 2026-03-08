@@ -1,44 +1,23 @@
 import { createContext, useContext } from 'react';
 import { useColorScheme } from 'react-native';
+import { Colors } from '@/constants/theme';
 
-const lightColors = {
-  primary: '#007AFF',
-  background: '#FFFFFF',
-  surface: '#F2F2F7',
-  text: '#000000',
-  textMuted: '#8E8E93',
-  border: '#C6C6C8',
-  error: '#FF3B30',
-  success: '#34C759',
-};
-
-const darkColors = {
-  primary: '#0A84FF',
-  background: '#000000',
-  surface: '#1C1C1E',
-  text: '#FFFFFF',
-  textMuted: '#8E8E93',
-  border: '#38383A',
-  error: '#FF453A',
-  success: '#32D74B',
-};
-
-type Colors = typeof lightColors;
+type ColorSet = typeof Colors.light;
 
 interface ThemeContextType {
-  colors: Colors;
+  colors: ColorSet;
   isDark: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  colors: lightColors,
+  colors: Colors.light,
   isDark: false,
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
-  const colors = isDark ? darkColors : lightColors;
+  const colors = isDark ? Colors.dark : Colors.light;
 
   return (
     <ThemeContext.Provider value={{ colors, isDark }}>
