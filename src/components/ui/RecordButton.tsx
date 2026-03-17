@@ -4,7 +4,6 @@ import Animated, {
   useSharedValue,
   withRepeat,
   withTiming,
-  withSequence,
   withSpring,
   Easing,
 } from 'react-native-reanimated';
@@ -18,7 +17,7 @@ interface RecordButtonProps {
 }
 
 export function RecordButton({ state, onPress }: RecordButtonProps) {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const pulseScale = useSharedValue(1);
   const pulseOpacity = useSharedValue(0);
   const buttonScale = useSharedValue(1);
@@ -60,9 +59,23 @@ export function RecordButton({ state, onPress }: RecordButtonProps) {
     buttonScale.value = withSpring(1, { damping: 15 });
   };
 
-  const buttonBg = state === 'recording' ? colors.accent : colors.accent;
-
   const iconColor = '#F4F1EC';
+
+  const shadowStyle = state === 'recording'
+    ? {
+        shadowColor: '#C4614A',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.45,
+        shadowRadius: 16,
+        elevation: 8,
+      }
+    : {
+        shadowColor: '#C4614A',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 12,
+        elevation: 4,
+      };
 
   return (
     <View style={styles.wrapper}>
@@ -78,7 +91,7 @@ export function RecordButton({ state, onPress }: RecordButtonProps) {
           onPress={onPress}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
-          style={[styles.button, { backgroundColor: buttonBg }]}
+          style={[styles.button, { backgroundColor: colors.accent }, shadowStyle]}
         >
           {state === 'completed' ? (
             <Check size={28} color={colors.success} weight="bold" />

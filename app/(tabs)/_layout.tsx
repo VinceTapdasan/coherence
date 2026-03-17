@@ -32,10 +32,10 @@ export default function TabLayout() {
         tabBarActiveTintColor: isRecording ? colors.background : colors.accent,
         tabBarInactiveTintColor: isRecording ? colors.background : colors.textSecondary,
         tabBarLabelStyle: {
-          fontFamily: FontFamily.sansSemiBold,
-          fontSize: 10,
+          fontFamily: FontFamily.sansMedium,
+          fontSize: 11,
           textTransform: 'uppercase',
-          letterSpacing: 0.6,
+          letterSpacing: 0.8,
           marginTop: -2,
         },
         tabBarStyle: {

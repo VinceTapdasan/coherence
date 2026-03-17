@@ -22,17 +22,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth();
   }, []);
 
-  useEffect(() => {
-    if (isLoading) return;
-
-    const inAuthGroup = segments[0] === '(auth)';
-
-    if (!user && !inAuthGroup) {
-      router.replace('/(auth)/login');
-    } else if (user && inAuthGroup) {
-      router.replace('/(tabs)');
-    }
-  }, [user, segments, isLoading]);
+  // TODO: re-enable when auth screens are built
+  // useEffect(() => {
+  //   if (isLoading) return;
+  //   const inAuthGroup = segments[0] === '(auth)';
+  //   if (!user && !inAuthGroup) {
+  //     router.replace('/(auth)/login');
+  //   } else if (user && inAuthGroup) {
+  //     router.replace('/(tabs)');
+  //   }
+  // }, [user, segments, isLoading]);
 
   async function checkAuth() {
     try {

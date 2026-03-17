@@ -10,6 +10,7 @@ import Animated, {
   interpolateColor,
   runOnJS,
   Extrapolation,
+  type SharedValue,
 } from 'react-native-reanimated';
 import { FontFamily } from '@/constants/theme';
 import { PRACTICE_WORDS as PRACTICE_WORDS_DATA } from '@/constants/words';
@@ -37,7 +38,7 @@ const START_INDEX = 5; // initial center index — ensures buffer above
 interface ReelItemProps {
   word: string;
   itemIndex: number;
-  translateY: Animated.SharedValue<number>;
+  translateY: SharedValue<number>;
 }
 
 function ReelItem({ word, itemIndex, translateY }: ReelItemProps) {
@@ -137,7 +138,7 @@ export function SlotMachineWord({
 
 // The visual reel component — separate from the logic hook
 interface SlotReelViewProps {
-  translateY: Animated.SharedValue<number>;
+  translateY: SharedValue<number>;
 }
 
 export function SlotReelView({ translateY }: SlotReelViewProps) {

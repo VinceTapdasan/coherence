@@ -7,6 +7,7 @@ import Animated, {
   useSharedValue,
   withRepeat,
   withTiming,
+  type SharedValue,
 } from 'react-native-reanimated';
 
 const BAR_COUNT = 80;
@@ -26,7 +27,7 @@ const R2 = 196, G2 = 97, B2 = 74;
 
 interface WaveBarProps {
   index: number;
-  tick: Animated.SharedValue<number>;
+  tick: SharedValue<number>;
 }
 
 function WaveBar({ index, tick }: WaveBarProps) {

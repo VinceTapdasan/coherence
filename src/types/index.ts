@@ -12,6 +12,8 @@ export interface Credentials {
 export interface Word {
   id: string;
   word: string;
+  pronunciation?: string;
+  pos?: string;
   definition: string;
   exampleSentence: string;
   category: 'daily' | 'practice';

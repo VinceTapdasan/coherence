@@ -1,12 +1,11 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
-import { CaretLeft, CaretRight } from 'phosphor-react-native';
 import { useTheme } from '@/hooks/useTheme';
 import { FontFamily, Spacing } from '@/constants/theme';
 import { useCalendar, useStreak } from '@/hooks/useCalendar';
 
-const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
 function toDateKey(year: number, month: number, day: number): string {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -35,12 +34,10 @@ export default function CalendarScreen() {
   const entries = calendarQuery.data ?? [];
   const streakCurrent = streakQuery.data?.current ?? 0;
 
-  // Build a Set of completed date strings from the real data
   const completedDates = new Set<string>(
     entries.filter((e) => e.completed).map((e) => e.date)
   );
 
-  // Sum sessionCount for current view month
   const monthPrefix = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
   const sessionCount = entries
     .filter((e) => e.date.startsWith(monthPrefix))
@@ -55,6 +52,12 @@ export default function CalendarScreen() {
 
   const isCompleted = (day: number) =>
     completedDates.has(toDateKey(viewYear, viewMonth, day));
+
+  const isFuture = (day: number) => {
+    const cellDate = new Date(viewYear, viewMonth, day);
+    const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    return cellDate > todayDate;
+  };
 
   const goToPrev = () => {
     if (viewMonth === 0) {
@@ -74,7 +77,7 @@ export default function CalendarScreen() {
     }
   };
 
-  // Build grid cells: empty slots + day numbers
+  // Build grid cells: empty leading slots + day numbers
   const cells: (number | null)[] = [
     ...Array(firstDay).fill(null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
@@ -85,8 +88,25 @@ export default function CalendarScreen() {
       style={[styles.container, { backgroundColor: colors.background }]}
       edges={['top']}
     >
-      {/* Header */}
-      <View style={styles.header}>
+      {/* Top bar */}
+      <View style={styles.topBar}>
+        <Text
+          style={[
+            styles.wordmark,
+            { color: colors.text, fontFamily: FontFamily.sansSemiBold },
+          ]}
+        >
+          Coherence
+        </Text>
+        <View style={styles.topBarRight} />
+      </View>
+
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
         <Text
           style={[
             styles.headerTitle,
@@ -103,13 +123,7 @@ export default function CalendarScreen() {
         >
           Keep up the daily habit.
         </Text>
-      </View>
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
         {/* Streak */}
         <View style={styles.streakRow}>
           <Text
@@ -135,17 +149,31 @@ export default function CalendarScreen() {
           <Text
             style={[
               styles.monthTitle,
-              { color: colors.text, fontFamily: FontFamily.sansSemiBold },
+              { color: colors.text, fontFamily: FontFamily.sansMedium },
             ]}
           >
             {MONTH_NAMES[viewMonth]} {viewYear}
           </Text>
           <View style={styles.monthNavActions}>
-            <Pressable onPress={goToPrev} hitSlop={8}>
-              <CaretLeft size={18} color={colors.textSecondary} weight="light" />
+            <Pressable onPress={goToPrev} hitSlop={8} style={styles.navBtn}>
+              <Text
+                style={[
+                  styles.navBtnText,
+                  { color: colors.textSecondary, fontFamily: FontFamily.sans },
+                ]}
+              >
+                ‹
+              </Text>
             </Pressable>
-            <Pressable onPress={goToNext} hitSlop={8}>
-              <CaretRight size={18} color={colors.textSecondary} weight="light" />
+            <Pressable onPress={goToNext} hitSlop={8} style={styles.navBtn}>
+              <Text
+                style={[
+                  styles.navBtnText,
+                  { color: colors.textSecondary, fontFamily: FontFamily.sans },
+                ]}
+              >
+                ›
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -175,18 +203,24 @@ export default function CalendarScreen() {
 
             const completed = isCompleted(day);
             const todayCell = isToday(day);
+            const futureCell = isFuture(day);
 
             const circleStyle = completed
               ? { backgroundColor: colors.accent }
               : todayCell
                 ? { borderWidth: 1.5, borderColor: colors.accent }
-                : { borderWidth: 1, borderColor: colors.divider };
+                : {};
 
             const textColor = completed
               ? '#F4F1EC'
               : todayCell
                 ? colors.accent
-                : colors.textSecondary;
+                : futureCell
+                  ? colors.divider
+                  : colors.text;
+
+            const fontFamily =
+              completed || todayCell ? FontFamily.sansMedium : FontFamily.sans;
 
             return (
               <View key={day} style={styles.dayCell}>
@@ -194,7 +228,7 @@ export default function CalendarScreen() {
                   <Text
                     style={[
                       styles.dayNumber,
-                      { color: textColor, fontFamily: FontFamily.sans },
+                      { color: textColor, fontFamily },
                     ]}
                   >
                     {day}
@@ -223,17 +257,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
-    paddingBottom: Spacing.lg,
+    paddingBottom: Spacing.md,
   },
-  headerTitle: {
-    fontSize: 22,
-    marginBottom: 4,
+  wordmark: {
+    fontSize: 16,
+    letterSpacing: -0.15,
   },
-  headerSub: {
-    fontSize: 15,
+  topBarRight: {
+    width: 24,
   },
   scroll: {
     flex: 1,
@@ -241,11 +278,19 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: Spacing.lg,
     paddingBottom: 48,
-    gap: Spacing.xl,
+  },
+  headerTitle: {
+    fontSize: 22,
+    marginBottom: 4,
+  },
+  headerSub: {
+    fontSize: 15,
+    marginBottom: 32,
   },
   streakRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
+    marginBottom: 32,
   },
   streakNumber: {
     fontSize: 48,
@@ -258,17 +303,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: 20,
   },
   monthTitle: {
-    fontSize: 17,
+    fontSize: 16,
   },
   monthNavActions: {
     flexDirection: 'row',
-    gap: Spacing.md,
+    gap: 16,
+  },
+  navBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  navBtnText: {
+    fontSize: 18,
   },
   weekdayRow: {
     flexDirection: 'row',
-    marginBottom: -Spacing.sm,
+    marginBottom: 12,
   },
   weekdayCell: {
     flex: 1,
@@ -276,22 +329,25 @@ const styles = StyleSheet.create({
   },
   weekdayLabel: {
     fontSize: 11,
-    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
   },
   dayGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    rowGap: 8,
+    marginBottom: 32,
   },
   dayCell: {
     width: `${100 / 7}%`,
-    aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 2,
   },
   dayCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },

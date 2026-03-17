@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowsClockwise } from 'phosphor-react-native';
 import { useTheme } from '@/hooks/useTheme';
 import { FontFamily, Spacing } from '@/constants/theme';
 import { DailyTopicTab } from '@/components/features/home/DailyTopicTab';
@@ -21,6 +20,7 @@ export default function HomeScreen() {
   const { setIsRecording } = useRecording();
   const [activeTab, setActiveTab] = useState<ActiveTab>('daily');
   const [recordingState, setRecordingState] = useState<RecordingState>('idle');
+  const [dailyCompleted, setDailyCompleted] = useState(false);
 
   const { data: dailyWord } = useDailyWord();
   const { data: practiceWords } = usePracticeWords();
@@ -45,6 +45,10 @@ export default function HomeScreen() {
 
       const word = activeTab === 'daily' ? (dailyWord ?? null) : null;
       const topicLabel = word ? word.word : activeTab === 'daily' ? '...' : 'Practice';
+
+      if (activeTab === 'daily') {
+        setDailyCompleted(true);
+      }
 
       submitRecording.mutate(
         {
@@ -72,10 +76,8 @@ export default function HomeScreen() {
     }
   };
 
-  const handleRefresh = () => {
-    if (recordingState !== 'recording') {
-      // Reset / shuffle topic (for daily mode this could fetch new topic)
-    }
+  const handleViewResults = () => {
+    router.push({ pathname: '/(tabs)/results' });
   };
 
   return (
@@ -84,7 +86,7 @@ export default function HomeScreen() {
       edges={['top']}
     >
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: colors.divider }]}>
+      <View style={[styles.header]}>
         <Text
           style={[
             styles.wordmark,
@@ -93,9 +95,8 @@ export default function HomeScreen() {
         >
           Coherence
         </Text>
-        <Pressable onPress={handleRefresh} hitSlop={8}>
-          <ArrowsClockwise size={22} color={colors.textSecondary} weight="light" />
-        </Pressable>
+        {/* Spacer to balance — no shuffle action needed on daily tab */}
+        <View style={styles.headerRight} />
       </View>
 
       {/* Sub-tab bar */}
@@ -135,11 +136,15 @@ export default function HomeScreen() {
         {activeTab === 'daily' ? (
           <DailyTopicTab
             topic={dailyWord?.word ?? '...'}
+            pronunciation={dailyWord?.pronunciation}
+            pos={dailyWord?.pos}
             definition={dailyWord?.definition}
             exampleSentence={dailyWord?.exampleSentence}
             recordingState={recordingState}
             elapsed={elapsed}
             onRecordPress={handleRecordPress}
+            dailyCompleted={dailyCompleted}
+            onViewResults={handleViewResults}
           />
         ) : (
           <PracticeModeTab
@@ -163,19 +168,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.md,
   },
   wordmark: {
     fontSize: 16,
+    letterSpacing: -0.15,
+  },
+  headerRight: {
+    width: 24,
   },
   subTabBar: {
     flexDirection: 'row',
     borderBottomWidth: 1,
+    marginHorizontal: Spacing.lg,
   },
   subTab: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: Spacing.md,
+    paddingTop: 12,
+    paddingBottom: 14,
     position: 'relative',
   },
   subTabLabel: {
@@ -184,7 +196,7 @@ const styles = StyleSheet.create({
   },
   subTabIndicator: {
     position: 'absolute',
-    bottom: 0,
+    bottom: -1,
     left: 16,
     right: 16,
     height: 2,
